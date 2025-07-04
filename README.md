@@ -37,10 +37,7 @@ Flutter and Dart developer community. Any amount will be appreciated. Thank you
 for your continued support!
 
 
-## PIX
 
-
-[![PIX](helpers/pix.png)](https://nubank.com.br/pagar/2bt2q/RBr4Szfuwr)
 
 ## Getting Started
 
