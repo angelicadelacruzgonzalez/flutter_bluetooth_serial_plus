@@ -1,0 +1,28 @@
+name: flutter_bluetooth_serial_plus_example
+version: 0.5.0
+description: Demonstrates how to use the `flutter_bluetooth_serial_plus` plugin.
+authors:
+  - Angelica de la Cruz Gonzalez <angelicadelacruzgonzalez@gmail.com>
+homepage: https://github.com/angelicadelacruzgonzalez/flutter_bluetooth_serial_plus
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  scoped_model: ^2.0.0-nullsafety.0
+  cupertino_icons: ^1.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_bluetooth_serial_plus:
+    path: ../
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
