@@ -1,5 +1,5 @@
 name: flutter_bluetooth_serial_plus
-version: 0.5.0
+version: 0.5.1
 description: Flutter basic implementation for Classical Bluetooth (only RFCOMM for now).
 homepage: https://github.com/angelicadelacruzgonzalez/flutter_bluetooth_serial_plus
 repository: https://github.com/angelicadelacruzgonzalez/flutter_bluetooth_serial_plus

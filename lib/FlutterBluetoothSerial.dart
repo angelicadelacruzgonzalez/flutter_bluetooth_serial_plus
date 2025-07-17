@@ -207,7 +207,9 @@ class FlutterBluetoothSerial {
 
   /// Returns list of bonded devices.
   Future<List<BluetoothDevice>> getBondedDevices() async {
+    print('ingresa busqueda de dispositivos');
     final List list = await (_methodChannel.invokeMethod('getBondedDevices'));
+    print('lalista es: ${list}');
     return list.map((map) => BluetoothDevice.fromMap(map)).toList();
   }
 

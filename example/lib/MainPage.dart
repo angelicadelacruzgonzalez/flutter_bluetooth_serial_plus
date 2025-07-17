@@ -37,12 +37,16 @@ class _MainPage extends State<MainPage> {
   }
 
   Future<void> _initializeBluetooth() async {
+    print('inicia blutooth');
     try {
       _bluetoothState = await FlutterBluetoothSerial.instance.state;
       setState(() {});
+      print(_bluetoothState);
 
       bool isEnabled = await FlutterBluetoothSerial.instance.isEnabled ?? false;
       if (isEnabled) {
+        print(' address: $_address');
+        print(' name: $_name');
         _address = (await FlutterBluetoothSerial.instance.address) ?? "...";
         _name = (await FlutterBluetoothSerial.instance.name) ?? "...";
         setState(() {});
