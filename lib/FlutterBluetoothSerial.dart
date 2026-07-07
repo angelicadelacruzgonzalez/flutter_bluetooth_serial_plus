@@ -293,7 +293,7 @@ class FlutterBluetoothSerial {
     'Use `BluetoothConnection.output` with some decoding (such as `ascii.decode` for strings) instead',
   )
   Future<void> write(String message) {
-    _defaultConnection!.output.add(utf8.encode(message) as Uint8List);
+    //_defaultConnection!.output.add(utf8.encode(message) as Uint8List);
     return _defaultConnection!.output.allSent;
   }
 

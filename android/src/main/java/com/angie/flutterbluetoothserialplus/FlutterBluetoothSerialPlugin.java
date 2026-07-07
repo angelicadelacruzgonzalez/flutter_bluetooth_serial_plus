@@ -45,6 +45,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+@SuppressLint({"MissingPermission", "NewApi"})
 
 public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAware {
     // Plugin
@@ -538,7 +539,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                     self.disconnect();
 
                     // True dispose
-                    AsyncTask.execute(() -> {
+              new Thread(() -> {
                         readChannel.setStreamHandler(null);
                         connections.remove(id);
 
@@ -1040,7 +1041,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
 
                     Log.d(TAG, "Connecting to " + address + " (id: " + id + ")");
 
-                    AsyncTask.execute(() -> {
+                   new Thread(() -> {
                         try {
                             connection.connect(address);
                             activity.runOnUiThread(() -> result.success(id));
@@ -1074,7 +1075,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
 
                     if (call.hasArgument("string")) {
                         String string = call.argument("string");
-                        AsyncTask.execute(() -> {
+                       new Thread(() -> {
                             try {
                                 connection.write(string.getBytes());
                                 activity.runOnUiThread(() -> result.success(null));
@@ -1084,7 +1085,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                         });
                     } else if (call.hasArgument("bytes")) {
                         byte[] bytes = call.argument("bytes");
-                        AsyncTask.execute(() -> {
+                      new Thread(() -> {
                             try {
                                 connection.write(bytes);
                                 activity.runOnUiThread(() -> result.success(null));

@@ -1,3 +1,13 @@
+## [0.5.1] - 2026-07-07
+
+Compatibilidad con Gradle 9 y Android Gradle Plugin (AGP) 9.
+
+* Se elimina el repositorio `jcenter()` (retirado en Gradle 9) y se reemplaza por `mavenCentral()`.
+* Se migra el DSL de Android obsoleto: `compileSdkVersion` -> `compileSdk`, `minSdkVersion` -> `minSdk`, `lintOptions` -> `lint`.
+* Se elimina `buildToolsVersion '30.0.3'` para usar la versión por defecto de AGP.
+* Se mueve la dependencia `androidx.appcompat` al bloque `dependencies` de nivel superior.
+* Se amplía el rango del SDK de Dart a `<4.0.0`.
+
 ## [0.5.0] - 2025-07-04
 Update flutter plugin for new version flutter 
 

@@ -1,8 +1,3 @@
-/// @name LineChart
-/// @version 0.0.5
-/// @description Simple line chart widget
-/// @author Patryk "PsychoX" Ludwikowski <patryk.ludwikowski.7+dart@gmail.com>
-/// @license MIT License (see https://mit-license.org/)
 import 'dart:math' as math show min, max;
 import 'dart:ui' as ui;
 

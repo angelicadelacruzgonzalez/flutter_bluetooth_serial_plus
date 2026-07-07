@@ -1,7 +1,6 @@
 library flutter_bluetooth_serial_plus;
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/services.dart';
 

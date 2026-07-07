@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.angie.flutter_bluetooth_serial_plus_example"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = flutter.ndkVersion
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

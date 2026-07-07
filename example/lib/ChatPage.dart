@@ -1,4 +1,4 @@
-import 'dart:async';
+/* import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -43,6 +43,7 @@ class _ChatPage extends State<ChatPage> {
 
     BluetoothConnection.toAddress(widget.server.address).then((_connection) {
       print('Connected to the device');
+      print(widget.server.address);
       connection = _connection;
       setState(() {
         isConnecting = false;
@@ -235,5 +236,331 @@ class _ChatPage extends State<ChatPage> {
         setState(() {});
       }
     }
+  }
+}
+ */
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_serial_plus/flutter_bluetooth_serial_plus.dart';
+
+class ChatPage extends StatefulWidget {
+  final BluetoothDevice server;
+
+  const ChatPage({required this.server});
+
+  @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _Message {
+  final bool mine;
+  final String text;
+
+  _Message(this.mine, this.text);
+}
+
+class _ChatPageState extends State<ChatPage> {
+  // ===== BLUETOOTH =====
+  BluetoothConnection? connection;
+
+  // ===== WIFI =====
+  ServerSocket? tcpServer;
+  Socket? tcpSocket;
+  RawDatagramSocket? udpSocket;
+
+  static const int tcpPort = 4040;
+  static const int udpPort = 4041;
+  static const String discoveryMsg = "DISCOVER_CHAT_V1";
+
+  // ===== UI =====
+  List<_Message> messages = [];
+  TextEditingController controller = TextEditingController();
+  ScrollController scroll = ScrollController();
+
+  bool isPhoneDevice = false;
+
+  bool isConnecting = true;
+  bool isWifiMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initHybrid();
+  }
+
+  // =========================
+  // 🔥 DETECTOR AUTOMÁTICO
+  // =========================
+  bool isPhone(String name) {
+    final n = name.toLowerCase();
+    return n.contains("moto") ||
+        n.contains("iphone") ||
+        n.contains("samsung") ||
+        n.contains("xiaomi") ||
+        n.contains("huawei") ||
+        n.contains("redmi");
+  }
+
+  void _initHybrid() {
+    final name = widget.server.name ?? "";
+
+    isPhoneDevice = isPhone(name);
+
+    if (isPhoneDevice) {
+      print("📡 Modo WiFi (celular detectado)");
+      isWifiMode = true;
+      _initWiFi();
+    } else {
+      print("🔵 Modo Bluetooth");
+      _initBluetooth();
+    }
+  }
+
+  // =========================
+  // 🔵 BLUETOOTH SPP
+  // =========================
+  void _initBluetooth() async {
+    try {
+      connection = await BluetoothConnection.toAddress(widget.server.address);
+
+      setState(() => isConnecting = false);
+
+      connection!.input!.listen((data) {
+        _addMessage(false, String.fromCharCodes(data));
+      });
+    } catch (e) {
+      _addSystem("❌ Error BT: $e");
+    }
+  }
+
+  // =========================
+  // 📡 WIFI AUTO DISCOVERY
+  // =========================
+  void _initWiFi() async {
+    _addSystem("🔍 Buscando peers...");
+
+    await _startUDPListener();
+    await _startTCPServer();
+    _broadcastDiscovery();
+
+    setState(() => isConnecting = false);
+  }
+/* 
+  Future<void> _startUDPListener() async {
+    //udpSocket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, udpPort);
+    udpSocket = await RawDatagramSocket.bind(
+      InternetAddress.anyIPv4,
+      udpPort,
+      reuseAddress: true,
+      reusePort: true,
+    );
+
+// 🔥 ESTA LÍNEA ES CLAVE
+    udpSocket!.broadcastEnabled = true;
+
+    udpSocket!.listen((event) {
+      if (event == RawSocketEvent.read) {
+        final datagram = udpSocket!.receive();
+        final msg = utf8.decode(datagram!.data);
+
+        if (msg == discoveryMsg) {
+          final senderIP = datagram.address.address;
+
+          _addSystem("📡 Peer encontrado: $senderIP");
+
+          _connectToPeer(senderIP);
+        }
+      }
+    });
+  }
+ */
+
+  Future<void> _startUDPListener() async {
+    udpSocket = await RawDatagramSocket.bind(
+      InternetAddress.anyIPv4,
+      udpPort,
+      reuseAddress: true,
+      reusePort: true,
+    );
+
+    udpSocket!.broadcastEnabled = true; // 🔥 clave
+
+    udpSocket!.listen((event) {
+      if (event == RawSocketEvent.read) {
+        final datagram = udpSocket!.receive();
+        final msg = utf8.decode(datagram!.data);
+
+        if (msg == discoveryMsg) {
+          final senderIP = datagram.address.address;
+          _addSystem("📡 Peer encontrado: $senderIP");
+          _connectToPeer(senderIP);
+        }
+      }
+    });
+  }
+
+  void _broadcastDiscovery() async {
+    final interfaces = await NetworkInterface.list();
+
+    for (var interface in interfaces) {
+      for (var addr in interface.addresses) {
+        if (addr.type == InternetAddressType.IPv4 &&
+            !addr.isLoopback &&
+            !addr.address.startsWith("127")) {
+          final ipParts = addr.address.split('.');
+          if (ipParts.length != 4) continue;
+
+          //final broadcast = "${ipParts[0]}.${ipParts[1]}.${ipParts[2]}.255";
+          final broadcast = InternetAddress("255.255.255.255").toString();
+
+          try {
+            udpSocket?.send(
+              utf8.encode(discoveryMsg),
+              InternetAddress(broadcast),
+              udpPort,
+            );
+
+            print("📡 Broadcast enviado a $broadcast");
+          } catch (e) {
+            print("❌ Error broadcast: $e");
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _startTCPServer() async {
+    tcpServer = await ServerSocket.bind(InternetAddress.anyIPv4, tcpPort);
+
+    tcpServer!.listen((client) {
+      tcpSocket = client;
+
+      _addSystem("📲 Cliente conectado");
+
+      client.listen((data) {
+        _addMessage(false, String.fromCharCodes(data));
+      });
+    });
+  }
+
+  Future<void> _connectToPeer(String ip) async {
+    if (tcpSocket != null) return;
+
+    try {
+      tcpSocket = await Socket.connect(ip, tcpPort);
+
+      _addSystem("✅ Conectado a $ip");
+
+      tcpSocket!.listen((data) {
+        _addMessage(false, String.fromCharCodes(data));
+      });
+    } catch (e) {
+      _addSystem("❌ Error conexión WiFi");
+    }
+  }
+
+  // =========================
+  // 💬 MENSAJES
+  // =========================
+  void _addMessage(bool mine, String text) {
+    setState(() {
+      messages.add(_Message(mine, text.trim()));
+    });
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      scroll.animateTo(
+        scroll.position.maxScrollExtent,
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  void _addSystem(String text) {
+    _addMessage(false, text);
+  }
+
+  void send() {
+    final text = controller.text.trim();
+    controller.clear();
+
+    if (text.isEmpty) return;
+
+    if (isWifiMode) {
+      tcpSocket?.write(text);
+    } else {
+      connection?.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
+    }
+
+    _addMessage(true, text);
+  }
+
+  // =========================
+  // UI
+  // =========================
+  @override
+  Widget build(BuildContext context) {
+    final name = widget.server.name ?? "Device";
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          isWifiMode ? "📡 WiFi Chat ($name)" : "🔵 Bluetooth Chat ($name)",
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: scroll,
+              itemCount: messages.length,
+              itemBuilder: (_, i) {
+                final m = messages[i];
+
+                return Align(
+                  alignment:
+                      m.mine ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: EdgeInsets.all(6),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: m.mine ? Colors.blueAccent : Colors.grey[700],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      m.text,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(child: TextField(controller: controller)),
+              IconButton(
+                icon: Icon(Icons.send),
+                onPressed: send,
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    connection?.dispose();
+    tcpSocket?.destroy();
+    tcpServer?.close();
+    udpSocket?.close();
+    super.dispose();
   }
 }
