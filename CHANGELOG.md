@@ -1,4 +1,4 @@
-## [0.5.1] - 2026-07-07
+## [0.5.2] - 2026-07-07
 
 Compatibilidad con Gradle 9 y Android Gradle Plugin (AGP) 9.
 
