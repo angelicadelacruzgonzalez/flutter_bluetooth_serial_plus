@@ -1,4 +1,11 @@
 ## [0.5.4] - 2026-07-08
+### Changed
+- Migrated Bluetooth functionality to improve compatibility with newer Flutter and Android versions.
+- Updated Android build configuration for newer Gradle and Android Gradle Plugin versions.
+
+### Fixed
+- Removed debug output from the plugin.
+- Cleaned unnecessary logs and debug messages.
 
 ## [0.5.3] - 2026-07-07
 
