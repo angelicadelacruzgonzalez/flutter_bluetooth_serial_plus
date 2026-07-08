@@ -1,3 +1,5 @@
+## [0.5.4] - 2026-07-08
+
 ## [0.5.3] - 2026-07-07
 
 Migración a Kotlin integrado (built-in Kotlin) de Flutter para AGP 9+.

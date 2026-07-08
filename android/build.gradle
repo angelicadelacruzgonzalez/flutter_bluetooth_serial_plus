@@ -1,12 +1,13 @@
 group 'com.angie.flutterbluetoothserialplus'
-version '1.0-SNAPSHOT'
+version '1.0.0'
+
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
       dependencies {
-          classpath 'com.android.tools.build:gradle:8.5.2'
+       classpath 'com.android.tools.build:gradle:8.1.1'
     }
 }
 rootProject.allprojects {
@@ -17,7 +18,7 @@ rootProject.allprojects {
 }
 apply plugin: 'com.android.library'
 android {
-    namespace 'com.angie.flutterbluetoothserialplus' // necesario
+    namespace 'com.angie.flutterbluetoothserialplus'
     compileSdk 36
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11

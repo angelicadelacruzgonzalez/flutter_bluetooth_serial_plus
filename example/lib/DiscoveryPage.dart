@@ -132,8 +132,6 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                 try {
                   // 🔐 AUTO BOND
                   if (!isBonded) {
-                    print("🔐 Emparejando ${device.address}...");
-
                     bool bonded = await FlutterBluetoothSerial.instance
                             .bondDeviceAtAddress(device.address) ??
                         false;
@@ -142,8 +140,6 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                       _showError("No se pudo emparejar");
                       return;
                     }
-
-                    print("✅ Emparejado");
 
                     setState(() {
                       results[index] = BluetoothDiscoveryResult(
@@ -170,11 +166,9 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                   if (isBonded) {
                     await FlutterBluetoothSerial.instance
                         .removeDeviceBondWithAddress(device.address);
-                    print("❌ Unbonded");
                   } else {
                     await FlutterBluetoothSerial.instance
                         .bondDeviceAtAddress(device.address);
-                    print("✅ Bonded");
                   }
 
                   _restartDiscovery();

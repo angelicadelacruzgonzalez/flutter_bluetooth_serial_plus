@@ -42,7 +42,6 @@ class DeviceConnection {
     if (_isConnecting) return;
 
     if (isPhone) {
-      print("⛔ ${device.name} es celular → NO SPP");
       _stateController.add(false);
       return;
     }
@@ -51,17 +50,13 @@ class DeviceConnection {
     _manualDisconnect = false;
 
     try {
-      print("🔄 Conectando a ${device.name} (${device.address})");
-
       _connection = await BluetoothConnection.toAddress(device.address);
-
-      print("✅ Conectado a ${device.name}");
 
       _stateController.add(true);
 
       _connection!.input!.listen((data) {
         final text = utf8.decode(data);
-        print("📥 ${device.name}: $text");
+
         _dataController.add(text);
       }).onDone(() {
         _stateController.add(false);
@@ -87,9 +82,7 @@ class DeviceConnection {
         Uint8List.fromList(utf8.encode(text + "\r\n")),
       );
       await _connection!.output.allSent;
-    } catch (e) {
-      print("❌ Error enviando: $e");
-    }
+    } catch (e) {}
   }
 
   Future<void> disconnect() async {
@@ -100,11 +93,9 @@ class DeviceConnection {
 
   void _reconnect() async {
     if (isPhone) {
-      print("⛔ Reconexión cancelada (celular)");
       return;
     }
 
-    print("🔁 Reintentando ${device.name} en 3s...");
     await Future.delayed(Duration(seconds: 3));
 
     if (!_manualDisconnect) connect();
@@ -124,7 +115,6 @@ class BluetoothManager {
   Future<DeviceConnection?> connectDevice(BluetoothDevice device) async {
     final temp = DeviceConnection(device);
     if (temp.isPhone) {
-      print("📡 ${device.name} → usar WiFi, no Bluetooth");
       return null;
     }
 
@@ -179,7 +169,6 @@ class _MainPage extends State<MainPage> {
     try {
       _bluetoothState = await FlutterBluetoothSerial.instance.state;
       setState(() {});
-      print(_bluetoothState);
 
       bool isEnabled = await FlutterBluetoothSerial.instance.isEnabled ?? false;
       if (isEnabled) {
@@ -197,9 +186,7 @@ class _MainPage extends State<MainPage> {
           _discoverableTimeoutSecondsLeft = 0;
         });
       });
-    } catch (e) {
-      print("Error initializing Bluetooth: \$e");
-    }
+    } catch (e) {}
   }
 
   @override
@@ -211,13 +198,10 @@ class _MainPage extends State<MainPage> {
   }
 
   Future<void> _enableDiscoverable() async {
-    print('🔵 Activando modo discoverable');
-
     final int timeout =
         (await FlutterBluetoothSerial.instance.requestDiscoverable(60))!;
 
     if (timeout < 0) {
-      print('❌ Usuario canceló discoverable');
       return;
     }
 
@@ -244,8 +228,6 @@ class _MainPage extends State<MainPage> {
   }
 
   Future<void> _disableDiscoverable() async {
-    print('🔴 Desactivando discoverable');
-
     _discoverableTimeoutTimer?.cancel();
 
     setState(() {
@@ -328,15 +310,10 @@ class _MainPage extends State<MainPage> {
                   IconButton(
                     icon: const Icon(Icons.refresh),
                     onPressed: () async {
-                      print('Discoverable requested');
                       final int timeout = (await FlutterBluetoothSerial.instance
                           .requestDiscoverable(60))!;
                       if (timeout < 0) {
-                        print('Discoverable mode denied');
-                      } else {
-                        print(
-                            'Discoverable mode acquired for \$timeout seconds');
-                      }
+                      } else {}
                       setState(() {
                         _discoverableTimeoutTimer?.cancel();
                         _discoverableTimeoutSecondsLeft = timeout;
@@ -408,9 +385,7 @@ class _MainPage extends State<MainPage> {
                       }
 
                       _startChat(context, selectedDevice);
-                    } else {
-                      print('Connect -> no device selected');
-                    }
+                    } else {}
                   }),
             ),
             ListTile(
@@ -428,9 +403,7 @@ class _MainPage extends State<MainPage> {
 
                   if (selectedDevice != null) {
                     _startChat(context, selectedDevice);
-                  } else {
-                    print('Connect -> no device selected');
-                  }
+                  } else {}
                 },
               ),
             ),
@@ -529,7 +502,6 @@ class _MainPage extends State<MainPage> {
       _collectingTask = await BackgroundCollectingTask.connect(server);
       await _collectingTask!.start();
     } catch (ex) {
-      print(ex.toString());
       _collectingTask?.cancel();
       showDialog(
         context: context,

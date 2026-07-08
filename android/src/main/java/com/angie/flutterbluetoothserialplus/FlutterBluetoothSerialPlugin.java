@@ -533,7 +533,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                     readSink = eventSink;
                 }
 
-                @Override
+           /*      @Override
                 public void onCancel(Object o) {
                     // If canceled by local, disconnects - in other case, by remote, does nothing
                     self.disconnect();
@@ -545,7 +545,18 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
 
                         Log.d(TAG, "Disconnected (id: " + id + ")");
                     });
-                }
+                } */
+
+                    @Override
+public void onCancel(Object o) {
+    self.disconnect();
+
+    new Thread(() -> {
+        readChannel.setStreamHandler(null);
+        connections.remove(id);
+        Log.d(TAG, "Disconnected (id: " + id + ")");
+    }).start();  // 👈 agregar
+}
             };
             readChannel.setStreamHandler(readStreamHandler);
         }
@@ -1049,7 +1060,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                             activity.runOnUiThread(() -> result.error("connect_error", ex.getMessage(), exceptionToString(ex)));
                             connections.remove(id);
                         }
-                    });
+                    }).start(); ;
                     break;
                 }
 
@@ -1082,7 +1093,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                             } catch (Exception ex) {
                                 activity.runOnUiThread(() -> result.error("write_error", ex.getMessage(), exceptionToString(ex)));
                             }
-                        });
+                        }).start(); ;
                     } else if (call.hasArgument("bytes")) {
                         byte[] bytes = call.argument("bytes");
                       new Thread(() -> {
@@ -1092,7 +1103,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                             } catch (Exception ex) {
                                 activity.runOnUiThread(() -> result.error("write_error", ex.getMessage(), exceptionToString(ex)));
                             }
-                        });
+                        }).start(); ;
                     } else {
                         result.error("invalid_argument", "there must be 'string' or 'bytes' argument", null);
                     }

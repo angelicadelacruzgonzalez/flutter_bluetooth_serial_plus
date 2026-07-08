@@ -312,11 +312,9 @@ class _ChatPageState extends State<ChatPage> {
     isPhoneDevice = isPhone(name);
 
     if (isPhoneDevice) {
-      print("📡 Modo WiFi (celular detectado)");
       isWifiMode = true;
       _initWiFi();
     } else {
-      print("🔵 Modo Bluetooth");
       _initBluetooth();
     }
   }
@@ -424,11 +422,7 @@ class _ChatPageState extends State<ChatPage> {
               InternetAddress(broadcast),
               udpPort,
             );
-
-            print("📡 Broadcast enviado a $broadcast");
-          } catch (e) {
-            print("❌ Error broadcast: $e");
-          }
+          } catch (e) {}
         }
       }
     }
