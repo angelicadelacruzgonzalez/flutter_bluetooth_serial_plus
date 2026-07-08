@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
       dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.2'
+          classpath 'com.android.tools.build:gradle:8.5.2'
     }
 }
 rootProject.allprojects {
@@ -18,10 +18,10 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 android {
     namespace 'com.angie.flutterbluetoothserialplus' // necesario
-    compileSdk 34
+    compileSdk 36
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     defaultConfig {
         minSdk 19
