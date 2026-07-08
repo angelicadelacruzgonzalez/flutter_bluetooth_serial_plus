@@ -1,3 +1,10 @@
+## [0.5.3] - 2026-07-07
+
+Migración a Kotlin integrado (built-in Kotlin) de Flutter para AGP 9+.
+
+* Se elimina el plugin `org.jetbrains.kotlin.android` (Kotlin Gradle Plugin) del bloque `plugins`.
+* Se elimina el bloque `kotlinOptions` y se reemplaza por `kotlin { compilerOptions { jvmTarget = ... } }`.
+* Se fija `compileSdk` en 36 en lugar de `flutter.compileSdkVersion`, para asegurar compatibilidad con las últimas dependencias de Android sin depender de la versión de Flutter instalada.
 ## [0.5.2] - 2026-07-07
 
 Compatibilidad con Gradle 9 y Android Gradle Plugin (AGP) 9.
