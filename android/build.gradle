@@ -1,6 +1,7 @@
 group 'com.angie.flutterbluetoothserialplus'
 version '1.0.0'
 
+
 buildscript {
     repositories {
         google()
