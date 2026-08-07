@@ -87,3 +87,6 @@ pubspec.lock
 # None at the moment
 **/.flutter-plugins-dependencies
 **/flutter_export_environment.sh
+
+# Build outputs de cualquier subproyecto
+**/build/

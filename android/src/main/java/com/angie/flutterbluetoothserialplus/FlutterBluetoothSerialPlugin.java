@@ -20,10 +20,10 @@ import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.IntentCompat;
 
 import android.util.Log;
 import android.util.SparseArray;
-import android.os.AsyncTask;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -120,7 +120,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
             public void onReceive(Context context, Intent intent) {
                 switch (intent.getAction()) {
                     case BluetoothDevice.ACTION_PAIRING_REQUEST:
-                        final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                        final BluetoothDevice device = IntentCompat.getParcelableExtra(intent, BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
                         final int pairingVariant = intent.getIntExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, BluetoothDevice.ERROR);
                         Log.d(TAG, "Pairing request (variant " + pairingVariant + ") incoming from " + device.getAddress());
                         switch (pairingVariant) {
@@ -155,7 +155,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                                             //Intent intent = new Intent(BluetoothAdapter.ACTION_PAIRING_REQUEST);
                                             //intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
                                             //intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, pairingVariant)
-                                            ActivityCompat.startActivity(activity, intent, null);
+                                            activity.startActivity(intent, null);
                                         }
                                         broadcastResult.finish();
                                     }
@@ -211,7 +211,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                                             }
                                         } else {
                                             Log.d(TAG, "Manual passkey confirmation pairing in progress (key: " + pairingKey + ")");
-                                            ActivityCompat.startActivity(activity, intent, null);
+                                            activity.startActivity(intent, null);
                                         }
                                         broadcastResult.finish();
                                     }
@@ -274,7 +274,7 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
                 final String action = intent.getAction();
                 switch (action) {
                     case BluetoothDevice.ACTION_FOUND:
-                        final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                        final BluetoothDevice device = IntentCompat.getParcelableExtra(intent, BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
                         //final BluetoothClass deviceClass = intent.getParcelableExtra(BluetoothDevice.EXTRA_CLASS); // @TODO . !BluetoothClass!
                         //final String extraName = intent.getStringExtra(BluetoothDevice.EXTRA_NAME); // @TODO ? !EXTRA_NAME!
                         final int deviceRSSI = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
@@ -490,6 +490,22 @@ public class FlutterBluetoothSerialPlugin implements FlutterPlugin, ActivityAwar
 
 
 
+    /// Turns the local adapter off.
+    ///
+    /// `BluetoothAdapter.disable()` is deprecated since API 33 (Android 13) and is a no-op for
+    /// third party applications on newer Android versions. There is no replacement API, so the
+    /// call is kept for older devices and the user is redirected to the system settings otherwise.
+    @SuppressWarnings("deprecation")
+    private boolean disableBluetoothAdapter() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return bluetoothAdapter.disable();
+        }
+
+        Log.w(TAG, "Disabling the adapter programmatically is not allowed since Android 13, opening settings instead");
+        activity.startActivity(new Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS), null);
+        return false;
+    }
+
     /// Helper function to get string out of exception
     static private String exceptionToString(Exception ex) {
         StringWriter sw = new StringWriter();
@@ -613,7 +629,7 @@ public void onCancel(Object o) {
                     break;
 
                 case "openSettings":
-                    ContextCompat.startActivity(activity, new Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS), null);
+                    activity.startActivity(new Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS), null);
                     result.success(null);
                     break;
 
@@ -629,8 +645,7 @@ public void onCancel(Object o) {
 
                 case "requestDisable":
                     if (bluetoothAdapter.isEnabled()) {
-                        bluetoothAdapter.disable();
-                        result.success(true);
+                        result.success(disableBluetoothAdapter());
                     } else {
                         result.success(false);
                     }
@@ -867,7 +882,7 @@ public void onCancel(Object o) {
                             switch (intent.getAction()) {
                                 // @TODO . BluetoothDevice.ACTION_PAIRING_CANCEL
                                 case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
-                                    final BluetoothDevice someDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                                    final BluetoothDevice someDevice = IntentCompat.getParcelableExtra(intent, BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
                                     if (!someDevice.equals(device)) {
                                         break;
                                     }

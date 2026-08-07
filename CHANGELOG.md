@@ -1,3 +1,20 @@
+## [0.5.6] - 2026-08-07
+
+Se eliminan las notas de compilacion `uses or overrides a deprecated API` en Android.
+
+* `Intent.getParcelableExtra(String)` (obsoleto desde API 33) se reemplaza por
+  `IntentCompat.getParcelableExtra(intent, name, BluetoothDevice.class)`.
+* `ContextCompat.startActivity(Context, Intent, Bundle)` (obsoleto en androidx.core)
+  se reemplaza por `Activity.startActivity(Intent, Bundle)`.
+* `BluetoothAdapter.disable()` (obsoleto desde API 33 y sin efecto para apps de
+  terceros) se aisla en un helper: en Android 13+ se abre la pantalla de ajustes de
+  Bluetooth y `requestDisable` devuelve `false`.
+* Se elimina el import sin usar de `android.os.AsyncTask` (clase obsoleta).
+* `minSdk` sube de 19 a 21 y se actualizan `androidx.appcompat` a 1.7.1 y
+  `androidx.core` a 1.16.0.
+* Se habilita `-Xlint:deprecation` en la compilacion Java del plugin para detectar
+  regresiones.
+
 ## [0.5.5] - 2026-08-07
 - Update  Gradle 
 
