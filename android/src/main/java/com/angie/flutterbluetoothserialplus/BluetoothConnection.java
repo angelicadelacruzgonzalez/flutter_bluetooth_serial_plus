@@ -119,7 +119,14 @@ public abstract class BluetoothConnection
                 try {
                     bytes = input.read(buffer);
 
-                    onRead(Arrays.copyOf(buffer, bytes));
+                    if (bytes == -1) {
+                        //Android 17 behaviour indicating socket has been closed
+                        break;
+                    }
+
+                    if (bytes > 0) {
+                        onRead(Arrays.copyOf(buffer, bytes));
+                    }
                 } catch (IOException e) {
                     // `input.read` throws when closed by remote device
                     break;
